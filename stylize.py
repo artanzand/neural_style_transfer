@@ -5,13 +5,14 @@
 and applies Neural Style Transfer on the content image to create a stylized rendering of the content
 image based on the texture and style of the style image.
 
-Usage: stylize.py --content=<image_path> --style=<csv_path> --save=<save_path> --similarity=<direction>
+Usage: stylize.py --content=<image_path> --style=<csv_path> --save=<save_path> --similarity=<direction> --epochs=<num_iter>
 
 Options:
 --content=<image_path>               file path of the content image - initial  
 --style=<csv_path>                   file path of the style image - target
 --save=<save_path>                   file path to save the stylized image 
 --similarity=<direction>             Whether the generated image is similar to "content", "style", "balanced"
+--epochs=<num_iter>                  number of epochs - 5,000 for speed, 20,000 for quality
 """
 
 import os
@@ -29,7 +30,7 @@ from docopt import docopt
 opt = docopt(__doc__)
 
 
-def main(content, style, save, similarity='balanced'):
+def main(content, style, save, similarity='balanced', epochs=500):
     """
     
     Parameters
@@ -37,6 +38,8 @@ def main(content, style, save, similarity='balanced'):
 
     Returns
     -------
+    image
+        saved stylized image
     """
     # Limit the image size to increase performance
     img_size = 400
@@ -87,7 +90,16 @@ def main(content, style, save, similarity='balanced'):
     # Initialize the optimizer
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
-    # 
+    # Train the model
+    epochs = epochs
+    for i in range(epochs):
+        train_step(generated_image)
+        if i % 250 == 0:
+            print(f"Epoch {i} >>>")
+        
+    image = tensor_to_image(generated_image)
+    image.save(f"output/image_{i}.jpg")
+
 
 
 def get_layer_outputs(vgg, layer_names):
@@ -222,6 +234,5 @@ def train_step(generated_image):
 
 
 
-
 if __name__ == "__main__":
-    main(opt["--content"], opt["--style"], opt["--save"], opt["--similarity"])
+    main(opt["--content"], opt["--style"], opt["--save"], opt["--similarity"], opt["--epochs"])
