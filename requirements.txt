@@ -1,13 +1,7 @@
 python==3.9.*
-
 tensorflow==2.6.0
-
-conda install -c conda-forge keras==2.6.*
-
-pillow
-
-matplotlib
-
-ipykernel
-
+keras==2.6.*
 numpy==1.22.*
+pillow
+# matplotlib
+# ipykernel
