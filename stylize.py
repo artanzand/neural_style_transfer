@@ -31,11 +31,11 @@ from docopt import docopt
 opt = docopt(__doc__)
 
 
-def main(content, style, save, similarity='balanced', epochs=500):
+def main(content, style, save, similarity="balanced", epochs=500):
     """
-    The main function reads two source images, one as the initial content image 
-    and second as the target style image, and applies Neural Style Transfer on 
-    the content image to create a stylized rendering of the content image based on 
+    The main function reads two source images, one as the initial content image
+    and second as the target style image, and applies Neural Style Transfer on
+    the content image to create a stylized rendering of the content image based on
     the texture and style of the style image.
 
     Parameters
@@ -56,6 +56,11 @@ def main(content, style, save, similarity='balanced', epochs=500):
     image
         saved stylized image
     """
+    # Exception handelings
+    try:
+        type(int(epochs)) == int
+    except Exception:
+        raise ("--epochs should be an integer value")
 
     # Limit the image size to increase performance
     img_size = 400
@@ -67,11 +72,10 @@ def main(content, style, save, similarity='balanced', epochs=500):
     # Lock in the model weights
     vgg.trainable = False
 
-
     # Load Content and Style images
-    content_image = preprocess_image(content)
-    content_image = preprocess_image(style)
-    
+    content_image = preprocess_image(content, img_size)
+    style_image = preprocess_image(style, img_size)
+
     # Randomly initialize Generated image
     # Setting the generated image as the variable to optimize
     generated_image = tf.Variable(
@@ -84,42 +88,44 @@ def main(content, style, save, similarity='balanced', epochs=500):
         generated_image, clip_value_min=0.0, clip_value_max=1.0
     )
 
-
     # Define output layers
     STYLE_LAYERS = get_style_layers(similarity=similarity)
-    content_layer = [('block5_conv4', 1)]  # The last layer of VGG19
+    content_layer = [("block5_conv4", 1)]  # The last layer of VGG19
 
     vgg_model_outputs = get_layer_outputs(vgg, STYLE_LAYERS + content_layer)
 
     # Content encoder
     # Define activation encoding for the content image (a_C)
     # Assign content image as the input of the VGG19
-    preprocessed_content =  tf.Variable(tf.image.convert_image_dtype(content_image, tf.float32))
+    preprocessed_content = tf.Variable(
+        tf.image.convert_image_dtype(content_image, tf.float32)
+    )
     a_C = vgg_model_outputs(preprocessed_content)
 
     # Style encoder
     # Define activation encoding for the style image (a_S)
     # Assign style image as the input of the VGG19
-    preprocessed_style =  tf.Variable(tf.image.convert_image_dtype(style_image, tf.float32))
+    preprocessed_style = tf.Variable(
+        tf.image.convert_image_dtype(style_image, tf.float32)
+    )
     a_S = vgg_model_outputs(preprocessed_style)
 
     # Initialize the optimizer
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
     # Train the model
-    epochs = epochs
+    epochs = int(epochs)
     for i in range(epochs):
         train_step(generated_image)
         if i % 250 == 0:
             print(f"Epoch {i} >>>")
-        
+
     image = tensor_to_image(generated_image)
     image.save(f"output/image_{i}.jpg")
 
 
-
 def get_layer_outputs(vgg, layer_names):
-    """ 
+    """
     Creates a vgg model that returns a list of intermediate output values.
     """
     outputs = [vgg.get_layer(layer[0]).output for layer in layer_names]
@@ -130,9 +136,9 @@ def get_layer_outputs(vgg, layer_names):
 
 def get_style_layers(similarity="balanced"):
     """
-    Assigns weights to style layer outputs to define whether the generated image 
+    Assigns weights to style layer outputs to define whether the generated image
     is similar to "content", "style", or "balanced". The function is picking the
-    last convolutional layer in each of the five blocks of the VGG network. The 
+    last convolutional layer in each of the five blocks of the VGG network. The
     activations of each of these layers along with the content layer (last layer)
     will be the outputs of the neural style transfer network.
 
@@ -140,7 +146,7 @@ def get_style_layers(similarity="balanced"):
     ----------
     similarity: str, optional
         a string identifying the similarity to either content, style or both
-    
+
     Returns
     -------
     STYLE_LAYERS
@@ -148,39 +154,45 @@ def get_style_layers(similarity="balanced"):
     """
     if similarity == "balanced":
         STYLE_LAYERS = [
-        ('block1_conv1', 0.2),
-        ('block2_conv1', 0.2),
-        ('block3_conv1', 0.2),
-        ('block4_conv1', 0.2),
-        ('block5_conv1', 0.2)]
+            ("block1_conv1", 0.2),
+            ("block2_conv1", 0.2),
+            ("block3_conv1", 0.2),
+            ("block4_conv1", 0.2),
+            ("block5_conv1", 0.2),
+        ]
     elif similarity == "content":
         STYLE_LAYERS = [
-        ('block1_conv1', 0.02),
-        ('block2_conv1', 0.08),
-        ('block3_conv1', 0.2),
-        ('block4_conv1', 0.3),
-        ('block5_conv1', 0.4)]
+            ("block1_conv1", 0.02),
+            ("block2_conv1", 0.08),
+            ("block3_conv1", 0.2),
+            ("block4_conv1", 0.3),
+            ("block5_conv1", 0.4),
+        ]
     elif similarity == "style":
-        ('block1_conv1', 0.4),
-        ('block2_conv1', 0.3),
-        ('block3_conv1', 0.2),
-        ('block4_conv1', 0.08),
-        ('block5_conv1', 0.02)]
+        STYLE_LAYERS = [
+            ("block1_conv1", 0.4),
+            ("block2_conv1", 0.3),
+            ("block3_conv1", 0.2),
+            ("block4_conv1", 0.08),
+            ("block5_conv1", 0.02),
+        ]
     else:
-        raise Exception("Please provide either of 'content', 'style' or 'balanced' for --similarity")
+        raise Exception(
+            "Please provide either of 'content', 'style' or 'balanced' for --similarity"
+        )
 
     return STYLE_LAYERS
 
 
-def preprocess_image(image_path):
+def preprocess_image(image_path, img_size):
     """
     loads the image and makes it compatible with VGG input size
-    
+
     Parameters
     ----------
     image_path: str
         directory path of the image
-    
+
     Returns
     -------
     image
@@ -198,11 +210,11 @@ def preprocess_image(image_path):
 def tensor_to_image(tensor):
     """
     Converts the calculated final vector into a PIL image
-    
+
     Parameters
     ----------
     tensor: Tensor
-    
+
     Returns
     -------
     Image
@@ -218,8 +230,8 @@ def tensor_to_image(tensor):
 
 @tf.function()
 def train_step(generated_image):
-    """ 
-    Uses precomputed encoded images a_S and a_C as constants, calculates 
+    """
+    Uses precomputed encoded images a_S and a_C as constants, calculates
     a_G as the encoding of the newly generated image, and uses the three
     to compute the cost function, and respectively, one gradient step.
 
@@ -229,10 +241,10 @@ def train_step(generated_image):
         image in shape of a vector
     """
     with tf.GradientTape() as tape:
-        
+
         # a_G as the vgg_model_outputs for the current generated image
         a_G = vgg_model_outputs(generated_image)
-        
+
         # Compute content cost
         J_content = compute_content_cost(a_C, a_G)
 
@@ -241,25 +253,26 @@ def train_step(generated_image):
 
         # Compute total cost
         J = total_cost(J_content, J_style, alpha=10, beta=40)
-        
-        
+
     grad = tape.gradient(J, generated_image)
 
     optimizer.apply_gradients([(grad, generated_image)])
-    generated_image.assign(tf.clip_by_value(generated_image, clip_value_min=0.0, clip_value_max=1.0))
+    generated_image.assign(
+        tf.clip_by_value(generated_image, clip_value_min=0.0, clip_value_max=1.0)
+    )
 
 
 def compute_content_cost(content_output, generated_output):
     """
     Computes the content cost.
-    
+
     Parameters
     ----------
-    a_C: tensor 
+    a_C: tensor
         hidden layer activations representing content of the image C - dimension (1, n_H, n_W, n_C)
     a_G: tensor
         hidden layer activations representing content of the image G - dimension (1, n_H, n_W, n_C)
-    
+
     Returns
     -------
     J_content: float64
@@ -268,17 +281,19 @@ def compute_content_cost(content_output, generated_output):
     # Exclude the last layer output
     a_C = content_output[-1]
     a_G = generated_output[-1]
-    
+
     # Retrieve dimensions from a_G
     _, n_H, n_W, n_C = a_G.get_shape().as_list()
-    
+
     # Reshape a_C and a_G
     a_C_unrolled = tf.reshape(a_C, shape=(1, -1, n_C))
     a_G_unrolled = tf.reshape(a_G, shape=(1, -1, n_C))
-    
+
     # compute the cost with tensorflow
-    J_content = (1 / (4 * n_C * n_H * n_W)) * tf.reduce_sum(tf.square(tf.subtract(a_C_unrolled, a_G_unrolled)))
-    
+    J_content = (1 / (4 * n_C * n_H * n_W)) * tf.reduce_sum(
+        tf.square(tf.subtract(a_C_unrolled, a_G_unrolled))
+    )
+
     return J_content
 
 
@@ -288,22 +303,22 @@ def compute_layer_style_cost(a_S, a_G):
 
     Parameters
     ----------
-    a_C: tensor 
+    a_C: tensor
         hidden layer activations representing content of the image C - dimension (1, n_H, n_W, n_C)
     a_G: tensor
         hidden layer activations representing content of the image G - dimension (1, n_H, n_W, n_C)
-    
+
     Returns
-    ------- 
-    J_style_layer 
+    -------
+    J_style_layer
         A scalar value representing style cost for a layer
     """
-    
+
     # Retrieve dimensions from a_G
     _, n_H, n_W, n_C = a_G.get_shape().as_list()
-    
+
     # Reshape the images from (1, n_H, n_W, n_C) to have them of shape (n_C, n_H * n_W)
-    a_S = tf.reshape(tf.transpose(a_S, perm=[3, 0, 1, 2]), shape=(n_C, -1))   
+    a_S = tf.reshape(tf.transpose(a_S, perm=[3, 0, 1, 2]), shape=(n_C, -1))
     a_G = tf.reshape(tf.transpose(a_G, perm=[3, 0, 1, 2]), shape=(n_C, -1))
 
     # Computing gram_matrices for both images S and G
@@ -311,15 +326,17 @@ def compute_layer_style_cost(a_S, a_G):
     GG = tf.matmul(a_G, tf.transpose(a_G))
 
     # Computing the loss
-    J_style_layer = (1 / (2 * n_C * n_H * n_W) ** 2) * tf.reduce_sum(tf.square(tf.subtract(GS, GG)))
-    
+    J_style_layer = (1 / (2 * n_C * n_H * n_W) ** 2) * tf.reduce_sum(
+        tf.square(tf.subtract(GS, GG))
+    )
+
     return J_style_layer
 
 
-def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS=STYLE_LAYERS):
+def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS):
     """
     Computes the overall style cost from several chosen layers
-    
+
     Parameters
     ----------
     style_image_output: tensor
@@ -328,13 +345,13 @@ def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS=
         output of VGG model for the generated image (activations of style layers & content layer)
     STYLE_LAYERS : list of tuples
         containing the names of the layers we would like to extract style from and a coefficient for each of them
-    
+
     Returns
-    ------- 
-    J_style 
+    -------
+    J_style
         A scalar value representing style cost
     """
-    
+
     # initialize the style cost
     J_style = 0
 
@@ -342,7 +359,7 @@ def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS=
     a_S = style_image_output[:-1]  # a_S is the hidden layer activations
     a_G = generated_image_output[:-1]  # a_G is the hidden layer activations
 
-    for i, weight in zip(range(len(a_S)), STYLE_LAYERS):  
+    for i, weight in zip(range(len(a_S)), STYLE_LAYERS):
         # Compute style_cost for the current layer
         J_style_layer = compute_layer_style_cost(a_S[i], a_G[i])
 
@@ -353,12 +370,12 @@ def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS=
 
 
 @tf.function()
-def total_cost(J_content, J_style, alpha = 10, beta = 40):
+def total_cost(J_content, J_style, alpha=10, beta=40):
     """
     Computes the total cost function. Because the main purpose of the algorithm
     is on matching the style of a target photo a bigger weight (beta) is given to
     the style image.
-    
+
     Parameters
     ----------
     J_content: float
@@ -369,17 +386,22 @@ def total_cost(J_content, J_style, alpha = 10, beta = 40):
         hyperparameter weighting the importance of the content cost
     beta: float
         hyperparameter weighting the importance of the style cost
-    
+
     Returns
     -------
     J
         total cost
-    """   
+    """
     J = alpha * J_content + beta * J_style
-    
+
     return J
 
 
-
 if __name__ == "__main__":
-    main(opt["--content"], opt["--style"], opt["--save"], opt["--similarity"], opt["--epochs"])
+    main(
+        opt["--content"],
+        opt["--style"],
+        opt["--save"],
+        opt["--similarity"],
+        opt["--epochs"],
+    )
