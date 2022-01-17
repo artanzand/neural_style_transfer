@@ -84,7 +84,10 @@ def main(content, style, save, similarity='balanced'):
     preprocessed_style =  tf.Variable(tf.image.convert_image_dtype(style_image, tf.float32))
     a_S = vgg_model_outputs(preprocessed_style)
 
-    
+    # Initialize the optimizer
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+
+    # 
 
 
 def get_layer_outputs(vgg, layer_names):
@@ -162,6 +165,61 @@ def preprocess_image(image_path):
     image = tf.constant(np.reshape(image, ((1,) + image.shape)))
 
     return image
+
+
+def tensor_to_image(tensor):
+    """
+    Converts the calculated final vector into a PIL image
+    
+    Parameters
+    ----------
+    tensor: Tensor
+    
+    Returns
+    -------
+    Image
+        A PIL image
+    """
+    tensor = tensor * 255
+    tensor = np.array(tensor, dtype=np.uint8)
+    if np.ndim(tensor) > 3:
+        assert tensor.shape[0] == 1
+        tensor = tensor[0]
+    return Image.fromarray(tensor)
+
+
+@tf.function()
+def train_step(generated_image):
+    """ 
+    Uses precomputed encoded images a_S and a_C as constants, calculates 
+    a_G as the encoding of the newly generated image, and uses the three
+    to compute the cost function, and respectively, one gradient step.
+
+    Parameters
+    ----------
+    generated_image: tensor
+        image in shape of a vector
+    """
+    with tf.GradientTape() as tape:
+        
+        # a_G as the vgg_model_outputs for the current generated image
+        a_G = vgg_model_outputs(generated_image)
+        
+        # Compute content cost
+        J_content = compute_content_cost(a_C, a_G)
+
+        # Compute style cost
+        J_style = compute_style_cost(a_S, a_G, STYLE_LAYERS=STYLE_LAYERS)
+
+        # Compute total cost
+        J = total_cost(J_content, J_style, alpha=10, beta=40)
+        
+        
+    grad = tape.gradient(J, generated_image)
+
+    optimizer.apply_gradients([(grad, generated_image)])
+    generated_image.assign(tf.clip_by_value(generated_image, clip_value_min=0.0, clip_value_max=1.0))
+
 
 
 
