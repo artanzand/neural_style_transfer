@@ -1,7 +1,8 @@
 # author: Artan Zandian
 # date: 2022-01-22
 
-"""Reads two source images, one as the initial content image and second as the target style image,
+"""
+Reads two source images, one as the initial content image and second as the target style image,
 and applies Neural Style Transfer on the content image to create a stylized rendering of the content
 image based on the texture and style of the style image.
 
@@ -32,15 +33,30 @@ opt = docopt(__doc__)
 
 def main(content, style, save, similarity='balanced', epochs=500):
     """
-    
+    The main function reads two source images, one as the initial content image 
+    and second as the target style image, and applies Neural Style Transfer on 
+    the content image to create a stylized rendering of the content image based on 
+    the texture and style of the style image.
+
     Parameters
     ----------
+    content: str
+        The image path to the content image to start from
+    style: str
+        The image path to the target style image
+    save: str
+        The path to save the image
+    similarity: str, optional
+        whether the generate image is similar to 'content', 'style' or 'both'
+    epochs: int, optional
+        number of iterations to train the generate image.
 
     Returns
     -------
     image
         saved stylized image
     """
+
     # Limit the image size to increase performance
     img_size = 400
 
