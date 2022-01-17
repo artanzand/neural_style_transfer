@@ -1,0 +1,13 @@
+name: NST
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pillow
+  - python=3.9
+  - tensorflow=2.6
+  - keras=2.6
+  - matplotlib
+  - ipykernel
+  
+prefix: C:\Users\artan\miniconda3\envs\NST
