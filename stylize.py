@@ -49,16 +49,10 @@ def main(content, style, save):
     vgg.trainable = False
 
 
-
     # Load Content and Style images
-    # Resize both to a square image
-    content_image = np.array(Image.open(content).resize((img_size, img_size)))
-    # Add one dim for VGG compatibility
-    content_image = tf.constant(np.reshape(content_image, ((1,) + content_image.shape)))
-
-    style_image = np.array(Image.open(style).resize((img_size, img_size)))
-    style_image = tf.constant(np.reshape(style_image, ((1,) + style_image.shape)))
-
+    content_image = preprocess_image(content)
+    content_image = preprocess_image(style)
+    
     # Randomly initialize Generated image
     # Setting the generated image as the variable to optimize
     generated_image = tf.Variable(
@@ -70,6 +64,7 @@ def main(content, style, save):
     generated_image = tf.clip_by_value(
         generated_image, clip_value_min=0.0, clip_value_max=1.0
     )
+
 
 
 
@@ -86,7 +81,10 @@ def get_layer_outputs(vgg, layer_names):
 def get_style_layers(similarity="balanced"):
     """
     Assigns weights to style layer outputs to define whether the generated image 
-    is similar to "content", "style", or "balanced"
+    is similar to "content", "style", or "balanced". The function is picking the
+    last convolutional layer in each of the five blocks of the VGG network. The 
+    activations of each of these layers along with the content layer (last layer)
+    will be the outputs of the neural style transfer network.
 
     Parameters
     ----------
@@ -124,7 +122,27 @@ def get_style_layers(similarity="balanced"):
     return STYLE_LAYERS
 
 
+def preprocess_image(image_path):
+    """
+    loads the image and makes it compatible with VGG input size
+    
+    Parameters
+    ----------
+    image_path: str
+        directory path of the image
+    
+    Returns
+    -------
+    image
+        loaded and standardaized image
+    """
+    # Load Content and Style images
+    # Resize both to a square image
+    image = np.array(Image.open(image_path).resize((img_size, img_size)))
+    # Add one dim for VGG compatibility
+    image = tf.constant(np.reshape(image, ((1,) + image.shape)))
 
+    return image
 
 
 
