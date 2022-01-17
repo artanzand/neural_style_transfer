@@ -29,7 +29,7 @@ from docopt import docopt
 opt = docopt(__doc__)
 
 
-def main(content, style, save):
+def main(content, style, save, similarity='balanced'):
     """
     
     Parameters
@@ -66,6 +66,25 @@ def main(content, style, save):
     )
 
 
+    # Define output layers
+    STYLE_LAYERS = get_style_layers(similarity=similarity)
+    content_layer = [('block5_conv4', 1)]  # The last layer of VGG19
+
+    vgg_model_outputs = get_layer_outputs(vgg, STYLE_LAYERS + content_layer)
+
+    # Content encoder
+    # Define activation encoding for the content image (a_C)
+    # Assign content image as the input of the VGG19
+    preprocessed_content =  tf.Variable(tf.image.convert_image_dtype(content_image, tf.float32))
+    a_C = vgg_model_outputs(preprocessed_content)
+
+    # Style encoder
+    # Define activation encoding for the style image (a_S)
+    # Assign style image as the input of the VGG19
+    preprocessed_style =  tf.Variable(tf.image.convert_image_dtype(style_image, tf.float32))
+    a_S = vgg_model_outputs(preprocessed_style)
+
+    
 
 
 def get_layer_outputs(vgg, layer_names):
