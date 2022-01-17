@@ -46,3 +46,4 @@ This is built on an unsupervised deep learning algorithm originally introduce by
 ## References
 ---
 [Gatys et al. (2015).](https://arxiv.org/abs/1508.06576)
+[neural_style](https://github.com/anishathalye/neural-style)
