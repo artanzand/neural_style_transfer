@@ -116,7 +116,9 @@ def main(content, style, save, similarity="balanced", epochs=500):
     # Train the model
     epochs = int(epochs)
     for i in range(epochs):
-        train_step(generated_image)
+        train_step(
+            generated_image, vgg_model_outputs, STYLE_LAYERS, optimizer, a_C, a_S
+        )
         if i % 250 == 0:
             print(f"Epoch {i} >>>")
 
@@ -229,7 +231,7 @@ def tensor_to_image(tensor):
 
 
 @tf.function()
-def train_step(generated_image):
+def train_step(generated_image, vgg_model_outputs, STYLE_LAYERS, optimizer, a_C, a_S):
     """
     Uses precomputed encoded images a_S and a_C as constants, calculates
     a_G as the encoding of the newly generated image, and uses the three
@@ -249,7 +251,7 @@ def train_step(generated_image):
         J_content = compute_content_cost(a_C, a_G)
 
         # Compute style cost
-        J_style = compute_style_cost(a_S, a_G, STYLE_LAYERS=STYLE_LAYERS)
+        J_style = compute_style_cost(a_S, a_G, STYLE_LAYERS)
 
         # Compute total cost
         J = total_cost(J_content, J_style, alpha=10, beta=40)
