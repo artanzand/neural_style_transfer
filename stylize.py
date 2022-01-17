@@ -249,6 +249,39 @@ def train_step(generated_image):
     generated_image.assign(tf.clip_by_value(generated_image, clip_value_min=0.0, clip_value_max=1.0))
 
 
+def compute_content_cost(content_output, generated_output):
+    """
+    Computes the content cost.
+    
+    Parameters
+    ----------
+    a_C: tensor 
+        hidden layer activations representing content of the image C - dimension (1, n_H, n_W, n_C)
+    a_G: tensor
+        hidden layer activations representing content of the image G - dimension (1, n_H, n_W, n_C)
+    
+    Returns
+    -------
+    J_content: float64
+        the content cost between a_C and a_G
+    """
+    # Exclude the last layer output
+    a_C = content_output[-1]
+    a_G = generated_output[-1]
+    
+    # Retrieve dimensions from a_G
+    _, n_H, n_W, n_C = a_G.get_shape().as_list()
+    
+    # Reshape a_C and a_G
+    a_C_unrolled = tf.reshape(a_C, shape=(1, -1, n_C))
+    a_G_unrolled = tf.reshape(a_G, shape=(1, -1, n_C))
+    
+    # compute the cost with tensorflow
+    J_content = (1 / (4 * n_C * n_H * n_W)) * tf.reduce_sum(tf.square(tf.subtract(a_C_unrolled, a_G_unrolled)))
+    
+    return J_content
+
+
 
 if __name__ == "__main__":
     main(opt["--content"], opt["--style"], opt["--save"], opt["--similarity"], opt["--epochs"])
