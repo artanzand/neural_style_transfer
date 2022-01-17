@@ -29,7 +29,14 @@ opt = docopt(__doc__)
 
 
 def main(content, style, save):
+    """
+    
+    Parameters
+    ----------
 
+    Returns
+    -------
+    """
     # Limit the image size to increase performance
     img_size = 400
 
@@ -40,7 +47,9 @@ def main(content, style, save):
     # Lock in the model weights
     vgg.trainable = False
 
-    # Load content and style images
+
+
+    # Load Content and Style images
     # Resize both to a square image
     content_image = np.array(Image.open(content).resize((img_size, img_size)))
     # Add one dim for VGG compatibility
@@ -49,15 +58,31 @@ def main(content, style, save):
     style_image = np.array(Image.open(style).resize((img_size, img_size)))
     style_image = tf.constant(np.reshape(style_image, ((1,) + style_image.shape)))
 
-    # Initialize generated image
+    # Randomly initialize Generated image
+    # Setting the generated image as the variable to optimize
     generated_image = tf.Variable(
         tf.image.convert_image_dtype(content_image, tf.float32)
     )
+    # Add random noise to initial generated image
     noise = tf.random.uniform(tf.shape(generated_image), -0.25, 0.25)
     generated_image = tf.add(generated_image, noise)
     generated_image = tf.clip_by_value(
         generated_image, clip_value_min=0.0, clip_value_max=1.0
     )
+
+
+
+def get_layer_outputs(vgg, layer_names):
+    """ 
+    Creates a vgg model that returns a list of intermediate output values.
+    """
+    outputs = [vgg.get_layer(layer[0]).output for layer in layer_names]
+
+    model = tf.keras.Model([vgg.input], outputs)
+    return model
+
+
+def get_layer_weights():
 
 
 if __name__ == "__main__":
