@@ -316,5 +316,42 @@ def compute_layer_style_cost(a_S, a_G):
     return J_style_layer
 
 
+def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS=STYLE_LAYERS):
+    """
+    Computes the overall style cost from several chosen layers
+    
+    Parameters
+    ----------
+    style_image_output: tensor
+        output of VGG model for the style image (activations of style layers & content layer)
+    generated_image_output: tensor
+        output of VGG model for the generated image (activations of style layers & content layer)
+    STYLE_LAYERS : list of tuples
+        containing the names of the layers we would like to extract style from and a coefficient for each of them
+    
+    Returns
+    ------- 
+    J_style 
+        A scalar value representing style cost
+    """
+    
+    # initialize the style cost
+    J_style = 0
+
+    # Excluding the last element of the array which contains the content layer image
+    a_S = style_image_output[:-1]  # a_S is the hidden layer activations
+    a_G = generated_image_output[:-1]  # a_G is the hidden layer activations
+    
+    for i, weight in zip(range(len(a_S)), STYLE_LAYERS):  
+        # Compute style_cost for the current layer
+        J_style_layer = compute_layer_style_cost(a_S[i], a_G[i])
+
+        # Add weight * J_style_layer of this layer to overall style cost
+        J_style += weight[1] * J_style_layer
+
+    return J_style
+
+
+
 if __name__ == "__main__":
     main(opt["--content"], opt["--style"], opt["--save"], opt["--similarity"], opt["--epochs"])
