@@ -282,6 +282,39 @@ def compute_content_cost(content_output, generated_output):
     return J_content
 
 
+def compute_layer_style_cost(a_S, a_G):
+    """
+    Computes the style cost of one layer
+
+    Parameters
+    ----------
+    a_C: tensor 
+        hidden layer activations representing content of the image C - dimension (1, n_H, n_W, n_C)
+    a_G: tensor
+        hidden layer activations representing content of the image G - dimension (1, n_H, n_W, n_C)
+    
+    Returns
+    ------- 
+    J_style_layer 
+        A scalar value representing style cost for a layer
+    """
+    
+    # Retrieve dimensions from a_G
+    _, n_H, n_W, n_C = a_G.get_shape().as_list()
+    
+    # Reshape the images from (1, n_H, n_W, n_C) to have them of shape (n_C, n_H * n_W)
+    a_S = tf.reshape(tf.transpose(a_S, perm=[3, 0, 1, 2]), shape=(n_C, -1))   
+    a_G = tf.reshape(tf.transpose(a_G, perm=[3, 0, 1, 2]), shape=(n_C, -1))
+
+    # Computing gram_matrices for both images S and G
+    GS = tf.matmul(a_S, tf.transpose(a_S))
+    GG = tf.matmul(a_G, tf.transpose(a_G))
+
+    # Computing the loss
+    J_style_layer = (1 / (2 * n_C * n_H * n_W) ** 2) * tf.reduce_sum(tf.square(tf.subtract(GS, GG)))
+    
+    return J_style_layer
+
 
 if __name__ == "__main__":
     main(opt["--content"], opt["--style"], opt["--save"], opt["--similarity"], opt["--epochs"])
