@@ -341,7 +341,7 @@ def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS=
     # Excluding the last element of the array which contains the content layer image
     a_S = style_image_output[:-1]  # a_S is the hidden layer activations
     a_G = generated_image_output[:-1]  # a_G is the hidden layer activations
-    
+
     for i, weight in zip(range(len(a_S)), STYLE_LAYERS):  
         # Compute style_cost for the current layer
         J_style_layer = compute_layer_style_cost(a_S[i], a_G[i])
@@ -350,6 +350,34 @@ def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS=
         J_style += weight[1] * J_style_layer
 
     return J_style
+
+
+@tf.function()
+def total_cost(J_content, J_style, alpha = 10, beta = 40):
+    """
+    Computes the total cost function. Because the main purpose of the algorithm
+    is on matching the style of a target photo a bigger weight (beta) is given to
+    the style image.
+    
+    Parameters
+    ----------
+    J_content: float
+        content cost computed in compute_content_cost
+    J_style: float
+        style cost computed in compute_style_cost
+    alpha: float
+        hyperparameter weighting the importance of the content cost
+    beta: float
+        hyperparameter weighting the importance of the style cost
+    
+    Returns
+    -------
+    J
+        total cost
+    """   
+    J = alpha * J_content + beta * J_style
+    
+    return J
 
 
 
