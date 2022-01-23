@@ -11,7 +11,7 @@ Usage: stylize.py --content=<image_path> --style=<csv_path> --save=<save_path> -
 Options:
 --content=<image_path>               file path of the content image - initial  
 --style=<csv_path>                   file path of the style image - target
---save=<save_path>                   file path to save the stylized image 
+--save=<save_path>                   file path to save the stylized image without image format
 --similarity=<direction>             Whether the generated image is similar to "content", "style", "balanced"
 --epochs=<num_iter>                  number of epochs - 5,000 for speed, 20,000 for quality
 """
@@ -28,7 +28,7 @@ from tensorflow import keras
 from docopt import docopt
 
 
-opt = docopt(__doc__)
+# opt = docopt(__doc__)
 
 
 def main(content, style, save, similarity="balanced", epochs=500):
@@ -45,7 +45,7 @@ def main(content, style, save, similarity="balanced", epochs=500):
     style: str
         The image path to the target style image
     save: str
-        The path to save the image
+        The path to save the image without image type
     similarity: str, optional
         whether the generate image is similar to 'content', 'style' or 'both'
     epochs: int, optional
@@ -112,6 +112,8 @@ def main(content, style, save, similarity="balanced", epochs=500):
 
     # Initialize the optimizer
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+    # Need to redefine the clipped image as a tf.variable to be optimized
+    generated_image = tf.Variable(generated_image)
 
     # Train the model
     epochs = int(epochs)
@@ -123,7 +125,7 @@ def main(content, style, save, similarity="balanced", epochs=500):
             print(f"Epoch {i} >>>")
 
     image = tensor_to_image(generated_image)
-    image.save(f"output/image_{i}.jpg")
+    image.save(save + ".jpg")
 
 
 def get_layer_outputs(vgg, layer_names):
@@ -398,6 +400,14 @@ def total_cost(J_content, J_style, alpha=10, beta=40):
 
     return J
 
+
+main(
+    "examples/louvre_small.jpg",
+    "examples/monet.jpg",
+    "examples/tarkib",
+    similarity="balanced",
+    epochs=500,
+)
 
 if __name__ == "__main__":
     main(
