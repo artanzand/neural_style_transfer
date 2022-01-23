@@ -16,10 +16,7 @@ Options:
 --epochs=<num_iter>                  number of epochs - 5,000 for speed, 20,000 for quality
 """
 
-import os
-import sys
-import scipy.io
-import scipy.misc
+
 from PIL import Image
 import numpy as np
 import tensorflow as tf
@@ -27,8 +24,9 @@ from tensorflow import keras
 
 from docopt import docopt
 
+opt = docopt(__doc__)
 
-# opt = docopt(__doc__)
+# stylize.py --content="examples/artan.jpg" --style="examples/mickey.jpg" --save="examples/tarkib" --similarity="style" --epochs=100
 
 
 def main(content, style, save, similarity="balanced", epochs=500):
@@ -47,7 +45,7 @@ def main(content, style, save, similarity="balanced", epochs=500):
     save: str
         The path to save the image without image type
     similarity: str, optional
-        whether the generate image is similar to 'content', 'style' or 'both'
+        whether the generate image is similar to 'content', 'style' or 'balanced'
     epochs: int, optional
         number of iterations to train the generate image.
 
@@ -400,14 +398,6 @@ def total_cost(J_content, J_style, alpha=10, beta=40):
 
     return J
 
-
-main(
-    "examples/louvre_small.jpg",
-    "examples/monet.jpg",
-    "examples/tarkib",
-    similarity="balanced",
-    epochs=500,
-)
 
 if __name__ == "__main__":
     main(
