@@ -8,13 +8,16 @@ FROM jupyter/minimal-notebook
 
 
 # Install Python 3 packages
-RUN conda install -c conda-forge --quiet -y \
-    python==3.9.* \
-    tensorflow==2.6.0 \
-    keras==2.6.* \
-    pillow \
-    numpy==1.22.* \
-    # matplotlib
-    # ipykernel
-    # jupyter notebook
+# RUN conda install -c conda-forge --quiet -y \
+#     python==3.9.* \
+#     tensorflow==2.6.0 \
+#     keras==2.6.* \
+#     pillow \
+#     numpy==1.22.* \
+
+
+
+# matplotlib
+# ipykernel
+# jupyter notebook
 
