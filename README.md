@@ -1,6 +1,6 @@
 # neural_style_transfer
 ---
-Author: Artan Zandian
+Author: Artan Zandian  
 Date: January 2022
 
 ## About
