@@ -1,34 +1,32 @@
 # neural_style_transfer
----
-Author: Artan Zandian
+Author: Artan Zandian  
 Date: January 2022
 
 ## About
----
 This is built on an unsupervised deep learning algorithm originally introduce by [Gatys et al. (2015).](https://arxiv.org/abs/1508.06576). 
 
 
 ## Usage
----
+
 
 
 
 ## Replicating Using Docker
----
+
 
 
 ## Example
----
+
 
 
 
 ## Parameters
----
+
 
 
 
 ## Requirements
----
+
 ### Neural Network Model and Weights
 
 
@@ -37,13 +35,13 @@ This is built on an unsupervised deep learning algorithm originally introduce by
 
 
 ## Related Project
----
+
 
 ## License
----
+
 
 
 ## References
----
-[Gatys et al. (2015).](https://arxiv.org/abs/1508.06576)
+
+[Gatys et al. (2015).](https://arxiv.org/abs/1508.06576)  
 [neural_style](https://github.com/anishathalye/neural-style)

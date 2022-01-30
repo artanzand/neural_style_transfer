@@ -15,5 +15,4 @@ RUN apt update && apt install -y python3-h5py
 RUN pip3 install --pre --no-cache-dir --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v42 tensorflow-gpu
 RUN pip3 install -U numpy
 
-
-# pillow - to be installed later
+# Install pillow
