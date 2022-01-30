@@ -12,7 +12,11 @@ RUN apt update && apt install -y --fix-missing python3-pip libhdf5-serial-dev hd
 RUN apt update && apt install -y python3-h5py
 
 # install tensor packages
+RUN pip3 install --upgrade setuptools
+RUN pip3 install cython
 RUN pip3 install --pre --no-cache-dir --extra-index-url https://developer.download.nvidia.com/compute/redist/jp/v42 tensorflow-gpu
 RUN pip3 install -U numpy
 
 # Install pillow
+
+
