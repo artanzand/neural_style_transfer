@@ -42,6 +42,7 @@ This is built on an unsupervised deep learning algorithm originally introduce by
 
 
 ## References
+Gatys, Leon A., Ecker, Alexander S. and Bethge, Matthias. "A Neural Algorithm of Artistic Style.." CoRR abs/1508.06576 (2015): [link to paper](https://arxiv.org/abs/1508.06576)    
+Athalye A., athalye2015neuralstyle, "Neural Style" (2015): [Repository](https://github.com/anishathalye/neural-style)   
 
-[Gatys et al. (2015).](https://arxiv.org/abs/1508.06576)  
-[neural_style](https://github.com/anishathalye/neural-style)
+[DeepLearning.ai](https://www.deeplearning.ai/) Deep Learning Specialization lecture notes 
