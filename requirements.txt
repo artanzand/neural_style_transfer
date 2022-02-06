@@ -1,5 +1,5 @@
 tensorflow==2.6.0
 keras==2.6.*
-numpy==1.22.*
+numpy
 pillow
 docopt
