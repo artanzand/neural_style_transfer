@@ -19,8 +19,7 @@ jobs:
       - run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - run: wget https://www.vlfeat.org/matconvnet/models/imagenet-vgg-verydeep-19.mat
-      - run: python stylize.py --content="examples/artan.jpg" --style="examples/mona.jpg" --save="examples/tarkib" --similarity="style" --epochs=1
+      - run: python stylize.py --content=examples/artan.JPG --style=examples/mona.JPG --save=examples/tarkib --similarity=style --epochs=1
   fmt:
     name: Format
     runs-on: ubuntu-latest
