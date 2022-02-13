@@ -26,7 +26,7 @@ from docopt import docopt
 
 opt = docopt(__doc__)
 
-# stylize.py --content="examples/artan.jpg" --style="examples/mickey.jpg" --save="examples/tarkib" --similarity="style" --epochs=100
+# stylize.py --content="examples/balloon.jpg" --style="examples/city-rain.jpg" --save="examples/style_100" --similarity="style" --epochs=100
 
 
 def main(content, style, save, similarity="balanced", epochs=500):
@@ -58,10 +58,14 @@ def main(content, style, save, similarity="balanced", epochs=500):
     try:
         type(int(epochs)) == int
     except Exception:
-        raise ("--epochs should be an integer value")
+        raise ("epochs should be an integer value")
 
     # Limit the image size to increase performance
     img_size = 400
+
+    # capture content image size to reshape at end
+    content_image = Image.open(content)
+    content_width, content_height = content_image.size
 
     # Load pretrained VGG19 model
     vgg = tf.keras.applications.VGG19(
@@ -113,6 +117,9 @@ def main(content, style, save, similarity="balanced", epochs=500):
     # Need to redefine the clipped image as a tf.variable to be optimized
     generated_image = tf.Variable(generated_image)
 
+    # Check if GPU is available
+    print("Num GPUs Available: ", len(tf.config.list_physical_devices("GPU")))
+
     # Train the model
     epochs = int(epochs)
     for i in range(epochs):
@@ -122,8 +129,11 @@ def main(content, style, save, similarity="balanced", epochs=500):
         if i % 250 == 0:
             print(f"Epoch {i} >>>")
 
+    # Resize to original size and save
     image = tensor_to_image(generated_image)
+    image = image.resize((content_width, content_height))
     image.save(save + ".jpg")
+    print("Image saved.")
 
 
 def get_layer_outputs(vgg, layer_names):
