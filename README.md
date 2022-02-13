@@ -7,7 +7,6 @@ This is built on an unsupervised deep learning algorithm originally introduce by
 <p align="center">
   <img src="https://github.com/artanzand/neural_style_transfer/blob/main/examples/balloon_style.gif" />
 </p>
-![ballon_style](https://github.com/artanzand/neural_style_transfer/blob/main/examples/balloon_style.gif)
 
 ## Usage
 
