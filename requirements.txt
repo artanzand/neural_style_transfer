@@ -1,8 +1,5 @@
-python==3.9.*
-tensorflow==2.6.0
-keras==2.6.*
-numpy==1.22.*
+tensorflow
+keras
+numpy
 pillow
 docopt
-# matplotlib
-# ipykernel
