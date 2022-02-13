@@ -6,7 +6,7 @@ dependencies:
   - python=3.9
   - tensorflow=2.6
   - keras=2.6
-  - docopt
-  - pillow
+  - docopt=0.6.1
+  - pillow=8.4.0
   
 prefix: C:\Users\artan\miniconda3\envs\NST
