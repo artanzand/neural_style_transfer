@@ -12,11 +12,11 @@ This project is a Tensorflow implementation of unsupervised deep learning algori
 ### Cloning the Repo
 Clone this Github repository and install the dependencies by running the following commands at the command line/terminal from the root directory of the project:
 
-`conda env create --file environment.yaml`
-`conda activate NST`
+```conda env create --file environment.yaml```  
+```conda activate NST```
 
-Run the below command by replacing <content image>, <style image> and <save directory>.
-`python stylize.py --content <content image> --style <style image> --save <save directory> --similarity <balanced> --epochs <num epochs>`
+Run the below command by replacing <content image> , <style image> and <save directory>.  
+```python stylize.py --content <content image> --style <style image> --save <save directory> --similarity <balanced> --epochs <num epochs>```
 
 Run `python stylize.py --help` to see a list of all options and input type details.  
   
@@ -24,7 +24,8 @@ Two optional arguments of --similarity (default "balanced") and --epochs (defaul
 For a 512×680 pixel content file, 1000 iterations take 75 seconds on an Nvidia Jetson Nano 2GB, or 75 minutes on an Intel Core i5-8250U. Due to the speedup using a GPU is highly recommended.
 
 ### Using NVIDIA Docker  
-Do you have access to an NVIDIA Jetson product? 
+Do you have access to an NVIDIA Jetson device? I have created an NVIDIA docker image which can be pulled to your device (I have tested it on Jetson Nano) using the command below. If you are interensted in learning how to build a custom NVIDIA image using Podman, check out my blog [here](https://artanzand.github.io//Tensorflow-Docker/).
+  
 docker run docker.io/artanzandian/keras:0.1.0 
 
 
