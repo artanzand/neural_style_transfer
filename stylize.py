@@ -6,14 +6,14 @@ Reads two source images, one as the initial content image and second as the targ
 and applies Neural Style Transfer on the content image to create a stylized rendering of the content
 image based on the texture and style of the style image.
 
-Usage: stylize.py --content=<image_path> --style=<csv_path> --save=<save_path> --similarity=<direction> --epochs=<num_iter>
+Usage: python stylize.py --content <content image> --style <style image> --save <save directory> --similarity <direction> --epochs <num_iter>
 
 Options:
 --content=<image_path>               file path of the content image - initial  
 --style=<csv_path>                   file path of the style image - target
 --save=<save_path>                   file path to save the stylized image without image format
 --similarity=<direction>             Whether the generated image is similar to "content", "style", "balanced"
---epochs=<num_iter>                  number of epochs - 5,000 for speed, 20,000 for quality
+--epochs=<num_iter>                  number of epochs - 2,000 for speed, 10,000 for quality
 """
 
 
@@ -25,8 +25,6 @@ from tensorflow import keras
 from docopt import docopt
 
 opt = docopt(__doc__)
-
-# stylize.py --content="examples/balloon.jpg" --style="examples/city-rain.jpg" --save="examples/style_100" --similarity="style" --epochs=100
 
 
 def main(content, style, save, similarity="balanced", epochs=500):
@@ -58,82 +56,88 @@ def main(content, style, save, similarity="balanced", epochs=500):
     try:
         type(int(epochs)) == int
     except Exception:
-        raise ("epochs should be an integer value")
+        raise ("epochs should be an integer value!")
 
-    # Limit the image size to increase performance
-    img_size = 400
+    try:
+        # Limit the image size to increase performance
+        image_size = 400
 
-    # capture content image size to reshape at end
-    content_image = Image.open(content)
-    content_width, content_height = content_image.size
+        # capture content image size to reshape at end
+        content_image = Image.open(content)
+        content_width, content_height = content_image.size
 
-    # Load pretrained VGG19 model
-    vgg = tf.keras.applications.VGG19(
-        include_top=False, input_shape=(img_size, img_size, 3), weights="imagenet"
-    )
-    # Lock in the model weights
-    vgg.trainable = False
-
-    # Load Content and Style images
-    content_image = preprocess_image(content, img_size)
-    style_image = preprocess_image(style, img_size)
-
-    # Randomly initialize Generated image
-    # Setting the generated image as the variable to optimize
-    generated_image = tf.Variable(
-        tf.image.convert_image_dtype(content_image, tf.float32)
-    )
-    # Add random noise to initial generated image
-    noise = tf.random.uniform(tf.shape(generated_image), -0.25, 0.25)
-    generated_image = tf.add(generated_image, noise)
-    generated_image = tf.clip_by_value(
-        generated_image, clip_value_min=0.0, clip_value_max=1.0
-    )
-
-    # Define output layers
-    STYLE_LAYERS = get_style_layers(similarity=similarity)
-    content_layer = [("block5_conv4", 1)]  # The last layer of VGG19
-
-    vgg_model_outputs = get_layer_outputs(vgg, STYLE_LAYERS + content_layer)
-
-    # Content encoder
-    # Define activation encoding for the content image (a_C)
-    # Assign content image as the input of the VGG19
-    preprocessed_content = tf.Variable(
-        tf.image.convert_image_dtype(content_image, tf.float32)
-    )
-    a_C = vgg_model_outputs(preprocessed_content)
-
-    # Style encoder
-    # Define activation encoding for the style image (a_S)
-    # Assign style image as the input of the VGG19
-    preprocessed_style = tf.Variable(
-        tf.image.convert_image_dtype(style_image, tf.float32)
-    )
-    a_S = vgg_model_outputs(preprocessed_style)
-
-    # Initialize the optimizer
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
-    # Need to redefine the clipped image as a tf.variable to be optimized
-    generated_image = tf.Variable(generated_image)
-
-    # Check if GPU is available
-    print("Num GPUs Available: ", len(tf.config.list_physical_devices("GPU")))
-
-    # Train the model
-    epochs = int(epochs)
-    for i in range(epochs):
-        train_step(
-            generated_image, vgg_model_outputs, STYLE_LAYERS, optimizer, a_C, a_S
+        # Load pretrained VGG19 model
+        vgg = tf.keras.applications.VGG19(
+            include_top=False,
+            input_shape=(image_size, image_size, 3),
+            weights="imagenet",
         )
-        if i % 250 == 0:
-            print(f"Epoch {i} >>>")
+        # Lock in the model weights
+        vgg.trainable = False
 
-    # Resize to original size and save
-    image = tensor_to_image(generated_image)
-    image = image.resize((content_width, content_height))
-    image.save(save + ".jpg")
-    print("Image saved.")
+        # Load Content and Style images
+        content_image = preprocess_image(content, image_size)
+        style_image = preprocess_image(style, image_size)
+
+        # Randomly initialize Generated image
+        # Define the generated image as as tensorflow variable to optimize
+        generated_image = tf.Variable(
+            tf.image.convert_image_dtype(content_image, tf.float32)
+        )
+        # Add random noise to initial generated image
+        noise = tf.random.uniform(tf.shape(generated_image), -0.25, 0.25)
+        generated_image = tf.add(generated_image, noise)
+        generated_image = tf.clip_by_value(
+            generated_image, clip_value_min=0.0, clip_value_max=1.0
+        )
+
+        # Define output layers
+        style_layers = get_style_layers(similarity=similarity)
+        content_layer = [("block5_conv4", 1)]  # The last layer of VGG19
+
+        vgg_model_outputs = get_layer_outputs(vgg, style_layers + content_layer)
+
+        # Content encoder
+        # Define activation encoding for the content image (a_C)
+        # Assign content image as the input of VGG19
+        preprocessed_content = tf.Variable(
+            tf.image.convert_image_dtype(content_image, tf.float32)
+        )
+        a_C = vgg_model_outputs(preprocessed_content)
+
+        # Style encoder
+        # Define activation encoding for the style image (a_S)
+        # Assign style image as the input of VGG19
+        preprocessed_style = tf.Variable(
+            tf.image.convert_image_dtype(style_image, tf.float32)
+        )
+        a_S = vgg_model_outputs(preprocessed_style)
+
+        # Initialize the optimizer
+        optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+        # Need to redefine the clipped image as a tf.variable to be optimized
+        generated_image = tf.Variable(generated_image)
+
+        # Check if GPU is available
+        print("Num GPUs Available: ", len(tf.config.list_physical_devices("GPU")))
+
+        # Train the model
+        epochs = int(epochs)
+        for i in range(epochs):
+            train_step(
+                generated_image, vgg_model_outputs, style_layers, optimizer, a_C, a_S
+            )
+            if i % 500 == 0:
+                print(f"Epoch {i} >>>")
+
+        # Resize to original size and save
+        image = tensor_to_image(generated_image)
+        image = image.resize((content_width, content_height))
+        image.save(save + ".jpg")
+        print("Image saved.")
+
+    except Exception as message:
+        print(message)
 
 
 def get_layer_outputs(vgg, layer_names):
@@ -161,11 +165,11 @@ def get_style_layers(similarity="balanced"):
 
     Returns
     -------
-    STYLE_LAYERS
+    style_layers
         a list of tuples identifying the name of style layer along with their weights
     """
     if similarity == "balanced":
-        STYLE_LAYERS = [
+        style_layers = [
             ("block1_conv1", 0.2),
             ("block2_conv1", 0.2),
             ("block3_conv1", 0.2),
@@ -173,7 +177,7 @@ def get_style_layers(similarity="balanced"):
             ("block5_conv1", 0.2),
         ]
     elif similarity == "content":
-        STYLE_LAYERS = [
+        style_layers = [
             ("block1_conv1", 0.02),
             ("block2_conv1", 0.08),
             ("block3_conv1", 0.2),
@@ -181,7 +185,7 @@ def get_style_layers(similarity="balanced"):
             ("block5_conv1", 0.4),
         ]
     elif similarity == "style":
-        STYLE_LAYERS = [
+        style_layers = [
             ("block1_conv1", 0.4),
             ("block2_conv1", 0.3),
             ("block3_conv1", 0.2),
@@ -193,10 +197,10 @@ def get_style_layers(similarity="balanced"):
             "Please provide either of 'content', 'style' or 'balanced' for --similarity"
         )
 
-    return STYLE_LAYERS
+    return style_layers
 
 
-def preprocess_image(image_path, img_size):
+def preprocess_image(image_path, image_size):
     """
     loads the image and makes it compatible with VGG input size
 
@@ -210,9 +214,8 @@ def preprocess_image(image_path, img_size):
     image
         loaded and standardaized image
     """
-    # Load Content and Style images
-    # Resize both to a square image
-    image = np.array(Image.open(image_path).resize((img_size, img_size)))
+    # Load and resize Content and Style images to a square image
+    image = np.array(Image.open(image_path).resize((image_size, image_size)))
     # Add one dim for VGG compatibility
     image = tf.constant(np.reshape(image, ((1,) + image.shape)))
 
@@ -235,13 +238,12 @@ def tensor_to_image(tensor):
     tensor = tensor * 255
     tensor = np.array(tensor, dtype=np.uint8)
     if np.ndim(tensor) > 3:
-        assert tensor.shape[0] == 1
         tensor = tensor[0]
     return Image.fromarray(tensor)
 
 
 @tf.function()
-def train_step(generated_image, vgg_model_outputs, STYLE_LAYERS, optimizer, a_C, a_S):
+def train_step(generated_image, vgg_model_outputs, style_layers, optimizer, a_C, a_S):
     """
     Uses precomputed encoded images a_S and a_C as constants, calculates
     a_G as the encoding of the newly generated image, and uses the three
@@ -261,7 +263,7 @@ def train_step(generated_image, vgg_model_outputs, STYLE_LAYERS, optimizer, a_C,
         J_content = compute_content_cost(a_C, a_G)
 
         # Compute style cost
-        J_style = compute_style_cost(a_S, a_G, STYLE_LAYERS)
+        J_style = compute_style_cost(a_S, a_G, style_layers)
 
         # Compute total cost
         J = total_cost(J_content, J_style, alpha=10, beta=40)
@@ -311,7 +313,7 @@ def compute_content_cost(content_output, generated_output):
 
 def compute_layer_style_cost(a_S, a_G):
     """
-    Computes the style cost of one layer
+    Computes the style cost of one layer.
 
     Parameters
     ----------
@@ -345,7 +347,7 @@ def compute_layer_style_cost(a_S, a_G):
     return J_style_layer
 
 
-def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS):
+def compute_style_cost(style_image_output, generated_image_output, style_layers):
     """
     Computes the overall style cost from several chosen layers
 
@@ -355,7 +357,7 @@ def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS)
         output of VGG model for the style image (activations of style layers & content layer)
     generated_image_output: tensor
         output of VGG model for the generated image (activations of style layers & content layer)
-    STYLE_LAYERS : list of tuples
+    style_layers : list of tuples
         containing the names of the layers we would like to extract style from and a coefficient for each of them
 
     Returns
@@ -364,14 +366,14 @@ def compute_style_cost(style_image_output, generated_image_output, STYLE_LAYERS)
         A scalar value representing style cost
     """
 
-    # initialize the style cost
+    # initialize the cost
     J_style = 0
 
     # Excluding the last element of the array which contains the content layer image
     a_S = style_image_output[:-1]  # a_S is the hidden layer activations
     a_G = generated_image_output[:-1]  # a_G is the hidden layer activations
 
-    for i, weight in zip(range(len(a_S)), STYLE_LAYERS):
+    for i, weight in zip(range(len(a_S)), style_layers):
         # Compute style_cost for the current layer
         J_style_layer = compute_layer_style_cost(a_S[i], a_G[i])
 
