@@ -42,13 +42,13 @@ python stylize.py --content=examples/balloon.JPG --style=examples/city-rain.jpg 
 ## Examples
 Running for 1000-2500 epochs usually produce nice results. If the light and exposure of the content and style images are similar, smaller number of epochs would work better while the model seems to be overfitting if the number of epochs is increases to 10,000. Overfitting in case of this model could be described as too much abstraction where the overall shape of the content photo is lost. The following example was run for 2500 iterations to produce the result (with default parameters). The style input image was Bob Ross's famous Summer painting, and the content image was my own image from Moraine Lake, Alberta.
 <p align="center">
-  <img src="https://github.com/artanzand/neural_style_transfer/blob/main/examples/moraine_style.jpg" />
+  <img src="https://github.com/artanzand/neural_style_transfer/blob/main/examples/moraine_style.JPG" />
 </p>
 <br>
 
 In the next example due to having a different light exposure (day vs night) the number of epochs were increased to 20,000 to generate decent looking results. The style input image was Rainy Night in the City by Leonid Afremov, and the content image was my own image from a balloon ride in Calgary, Alberta.
 <p align="center">
-  <img src="https://github.com/artanzand/neural_style_transfer/blob/main/examples/all-three.jpg" />
+  <img src="https://github.com/artanzand/neural_style_transfer/blob/main/examples/all-three.JPG" />
 </p>
 <br>
 
@@ -57,7 +57,7 @@ In the next example due to having a different light exposure (day vs night) the 
 ### Epochs
 As briefly alluded to in the Examples section, number of epochs controls the number of iterations and the proper size of epochs is highly dependent on the two input images.
 <p align="center">
-  <img src="https://github.com/artanzand/neural_style_transfer/blob/main/examples/epochs.jpg" />
+  <img src="https://github.com/artanzand/neural_style_transfer/blob/main/examples/epochs.JPG" />
 </p>
 <br>
 
@@ -65,7 +65,7 @@ As briefly alluded to in the Examples section, number of epochs controls the num
 There are five layers within the base VGG19 architecture used for this project. The weight of these layers determine how similar the output image will be to either of the two input images. For implementaiton details see [my post](https://artanzand.github.io//neural-style-transfer/). Instead of giving the user full selection freedom over the layer weights which are very confusing and hard to control, I have created three optimized options of layer weights which can be changed based on user preference to have an image that has similar details to the "content" image, "style" image or is "balanced" between the two. Below shows 20,000 iterations for each of the similarity options.   
 
 <p align="center">
-  <img src="https://github.com/artanzand/neural_style_transfer/blob/main/examples/similarity.jpg" />
+  <img src="https://github.com/artanzand/neural_style_transfer/blob/main/examples/similarity.JPG" />
 </p>
 <br>
 
