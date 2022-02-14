@@ -38,36 +38,24 @@ If you are proposing a feature:
 * Remember that this is a volunteer-driven project, and that contributions
   are welcome :)
 
-## Get Started!
+## Pull request process  
+We recommend that you create a Git branch for each pull request (PR).
+New code should follow the [Numpy](https://numpydoc.readthedocs.io/en/latest/format.html) style guide or [PEP8](https://www.python.org/dev/peps/pep-0008/) style guide.
 
-Ready to contribute? Here's how to set up `pycount_az` for local development.
+>### Creating a Branch  
+>Once your local environment is up-to-date, you can create a new git branch which will contain your contribution:  
+>```$ git checkout -b <branch-name>```
 
-1. Download a copy of `pycount_az` locally.
-2. Install `pycount_az` using `poetry`:
+>With this branch checked-out, make the desired changes to the package. Note that our code uses the black code formatter, which you can apply to your modifications by installing and running black on the local directory:  
+>```$ pip install black```  
+>```$ black .```
 
-    ```console
-    $ poetry install
-    ```
+>When you are happy with your changes, you can commit them to your branch by running  
+>```$ git add <modified-file>```  
+>```$ git commit -m "Some descriptive message about your change"```
 
-3. Use `git` (or similar) to create a branch for local development and make your changes:
-
-    ```console
-    $ git checkout -b name-of-your-bugfix-or-feature
-    ```
-
-4. When you're done making changes, check that your changes conform to any code formatting requirements and pass any tests.
-
-5. Commit your changes and open a pull request.
-
-## Pull Request Guidelines
-
-Before you submit a pull request, check that it meets these guidelines:
-
-1. The pull request should include additional tests if appropriate.
-2. If the pull request adds functionality, the docs should be updated.
-3. The pull request should work for all currently supported operating systems and versions of Python.
 
 ## Code of Conduct
 
-Please note that the `pycount_az` project is released with a 
+Please note that the `neural_style_transfer` project is released with a 
 Code of Conduct. By contributing to this project you agree to abide by its terms.
