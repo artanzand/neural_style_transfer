@@ -1,4 +1,4 @@
-# neural_style_transfer [![Build Status](https://github.com/anishathalye/neural-style/workflows/CI/badge.svg)](https://github.com/anishathalye/neural-style/actions?query=workflow%3ACI)
+# Neural Style Transfer [![Build Status](https://github.com/anishathalye/neural-style/workflows/CI/badge.svg)](https://github.com/anishathalye/neural-style/actions?query=workflow%3ACI)
 Author: Artan Zandian  
 Date: January 2022
 
